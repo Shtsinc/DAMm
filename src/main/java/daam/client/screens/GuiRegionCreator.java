@@ -63,6 +63,12 @@ public class GuiRegionCreator extends Screen {
         ambientNightField.setValue("");
         this.addRenderableWidget(ambientNightField);
         
+        // Add sound selector buttons
+        addSoundSelectorButton("🎵", musicDayField, centerX + fieldWidth/2 + 5, startY + spacing);
+        addSoundSelectorButton("🎵", musicNightField, centerX + fieldWidth/2 + 5, startY + spacing * 2);
+        addSoundSelectorButton("🔊", ambientDayField, centerX + fieldWidth/2 + 5, startY + spacing * 3);
+        addSoundSelectorButton("🔊", ambientNightField, centerX + fieldWidth/2 + 5, startY + spacing * 4);
+        
         // Create buttons
         createButton = Button.builder(Component.literal("Create Region"), button -> {
             createRegion();
@@ -74,6 +80,18 @@ public class GuiRegionCreator extends Screen {
             this.onClose();
         }).bounds(centerX + 5, startY + spacing * 6, 100, 20).build();
         this.addRenderableWidget(cancelButton);
+    }
+    
+    private void addSoundSelectorButton(String label, EditBox targetField, int x, int y) {
+        String fieldType = label.equals("🎵") ? "Music" : "Ambient";
+        Button selectorButton = Button.builder(Component.literal("♪"), button -> {
+            GuiSoundSelector soundSelector = new GuiSoundSelector(
+                "Select " + fieldType + " Sound", 
+                (selectedSound) -> targetField.setValue(selectedSound)
+            );
+            this.minecraft.setScreen(soundSelector);
+        }).bounds(x, y, 20, 20).build();
+        this.addRenderableWidget(selectorButton);
     }
     
     private void createRegion() {

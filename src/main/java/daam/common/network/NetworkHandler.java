@@ -3,6 +3,7 @@ package daam.common.network;
 import daam.DAAM;
 import daam.common.network.packets.client.*;
 import daam.common.network.packets.server.ResponseRegionFromChunkPacket;
+import daam.common.network.packets.SyncCurrentRegionPacket;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.network.NetworkDirection;
 import net.minecraftforge.network.NetworkRegistry;
@@ -64,6 +65,12 @@ public class NetworkHandler {
             .decoder(ResponseRegionFromChunkPacket::decode)
             .encoder((packet, buf) -> ResponseRegionFromChunkPacket.encode(packet, buf))
             .consumerMainThread((packet, ctx) -> ResponseRegionFromChunkPacket.handle(packet, ctx))
+            .add();
+            
+        INSTANCE.messageBuilder(SyncCurrentRegionPacket.class, packetId++, NetworkDirection.PLAY_TO_CLIENT)
+            .decoder(SyncCurrentRegionPacket::decode)
+            .encoder((packet, buf) -> packet.encode(buf))
+            .consumerMainThread((packet, ctx) -> packet.handle(ctx))
             .add();
     }
 }

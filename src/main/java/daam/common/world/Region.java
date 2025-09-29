@@ -1,11 +1,13 @@
 package daam.common.world;
 
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.phys.AABB;
 import net.minecraftforge.common.util.INBTSerializable;
 
-@Data
+@Getter
+@Setter
 public class Region implements INBTSerializable<CompoundTag> {
 
     private String UUID;

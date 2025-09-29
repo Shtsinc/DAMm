@@ -14,8 +14,6 @@ public class DynamicSound extends AbstractTickableSoundInstance {
 
     public final boolean flag;
 
-    @Setter
-    @Getter
     private boolean stop = false;
 
     private boolean finallyStop = false;
