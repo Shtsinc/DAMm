@@ -33,6 +33,4 @@ public class ResponseRegionFromChunkPacket extends SimplePacket {
     public void encode(FriendlyByteBuf buf) {
         encode(this, buf);
     }
-
-    @Override
 }

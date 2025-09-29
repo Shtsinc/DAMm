@@ -33,6 +33,4 @@ public class UpdateSoundBlockPacket extends SimplePacket {
     public void encode(FriendlyByteBuf buf) {
         encode(this, buf);
     }
-
-    @Override
 }
