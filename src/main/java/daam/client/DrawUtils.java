@@ -1,5 +1,6 @@
 package daam.client;
 
+import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.BufferBuilder;
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import com.mojang.blaze3d.vertex.PoseStack;
@@ -34,10 +35,10 @@ public class DrawUtils {
         BufferBuilder buffer = instance.getBuilder();
 
         // Set up rendering state
-        GameRenderer.setShader(() -> GameRenderer.getPositionColorShader());
+        RenderSystem.setShader(() -> GameRenderer.getPositionColorShader());
 
         // Draw bottom face
-        buffer.begin(VertexFormat.Mode.LINE_LOOP, DefaultVertexFormat.POSITION_COLOR);
+        buffer.begin(VertexFormat.Mode.LINE_STRIP, DefaultVertexFormat.POSITION_COLOR);
         buffer.vertex(x1, y1, z1).color(red, green, blue, alpha).endVertex();
         buffer.vertex(x2, y1, z1).color(red, green, blue, alpha).endVertex();
         buffer.vertex(x2, y1, z2).color(red, green, blue, alpha).endVertex();
@@ -45,7 +46,7 @@ public class DrawUtils {
         instance.end();
 
         // Draw top face
-        buffer.begin(VertexFormat.Mode.LINE_LOOP, DefaultVertexFormat.POSITION_COLOR);
+        buffer.begin(VertexFormat.Mode.LINE_STRIP, DefaultVertexFormat.POSITION_COLOR);
         buffer.vertex(x1, y2, z1).color(red, green, blue, alpha).endVertex();
         buffer.vertex(x2, y2, z1).color(red, green, blue, alpha).endVertex();
         buffer.vertex(x2, y2, z2).color(red, green, blue, alpha).endVertex();

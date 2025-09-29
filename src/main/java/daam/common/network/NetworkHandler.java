@@ -25,45 +25,45 @@ public class NetworkHandler {
         // Client to Server packets
         INSTANCE.messageBuilder(CreateRegionPacket.class, packetId++, NetworkDirection.PLAY_TO_SERVER)
             .decoder(CreateRegionPacket::decode)
-            .encoder(CreateRegionPacket::encode)
-            .consumerMainThread(CreateRegionPacket::handle)
+            .encoder((packet, buf) -> CreateRegionPacket.encode(packet, buf))
+            .consumerMainThread((packet, ctx) -> CreateRegionPacket.handle(packet, ctx))
             .add();
             
         INSTANCE.messageBuilder(RemoveRegionPacket.class, packetId++, NetworkDirection.PLAY_TO_SERVER)
             .decoder(RemoveRegionPacket::decode)
-            .encoder(RemoveRegionPacket::encode)
-            .consumerMainThread(RemoveRegionPacket::handle)
+            .encoder((packet, buf) -> RemoveRegionPacket.encode(packet, buf))
+            .consumerMainThread((packet, ctx) -> RemoveRegionPacket.handle(packet, ctx))
             .add();
             
         INSTANCE.messageBuilder(RequestRegionFromChunkPacket.class, packetId++, NetworkDirection.PLAY_TO_SERVER)
             .decoder(RequestRegionFromChunkPacket::decode)
-            .encoder(RequestRegionFromChunkPacket::encode)
-            .consumerMainThread(RequestRegionFromChunkPacket::handle)
+            .encoder((packet, buf) -> RequestRegionFromChunkPacket.encode(packet, buf))
+            .consumerMainThread((packet, ctx) -> RequestRegionFromChunkPacket.handle(packet, ctx))
             .add();
             
         INSTANCE.messageBuilder(SyncRegionPacket.class, packetId++, NetworkDirection.PLAY_TO_SERVER)
             .decoder(SyncRegionPacket::decode)
-            .encoder(SyncRegionPacket::encode)
-            .consumerMainThread(SyncRegionPacket::handle)
+            .encoder((packet, buf) -> SyncRegionPacket.encode(packet, buf))
+            .consumerMainThread((packet, ctx) -> SyncRegionPacket.handle(packet, ctx))
             .add();
             
         INSTANCE.messageBuilder(UpdateRegionPacket.class, packetId++, NetworkDirection.PLAY_TO_SERVER)
             .decoder(UpdateRegionPacket::decode)
-            .encoder(UpdateRegionPacket::encode)
-            .consumerMainThread(UpdateRegionPacket::handle)
+            .encoder((packet, buf) -> UpdateRegionPacket.encode(packet, buf))
+            .consumerMainThread((packet, ctx) -> UpdateRegionPacket.handle(packet, ctx))
             .add();
             
         INSTANCE.messageBuilder(UpdateSoundBlockPacket.class, packetId++, NetworkDirection.PLAY_TO_SERVER)
             .decoder(UpdateSoundBlockPacket::decode)
-            .encoder(UpdateSoundBlockPacket::encode)
-            .consumerMainThread(UpdateSoundBlockPacket::handle)
+            .encoder((packet, buf) -> UpdateSoundBlockPacket.encode(packet, buf))
+            .consumerMainThread((packet, ctx) -> UpdateSoundBlockPacket.handle(packet, ctx))
             .add();
             
         // Server to Client packets
         INSTANCE.messageBuilder(ResponseRegionFromChunkPacket.class, packetId++, NetworkDirection.PLAY_TO_CLIENT)
             .decoder(ResponseRegionFromChunkPacket::decode)
-            .encoder(ResponseRegionFromChunkPacket::encode)
-            .consumerMainThread(ResponseRegionFromChunkPacket::handle)
+            .encoder((packet, buf) -> ResponseRegionFromChunkPacket.encode(packet, buf))
+            .consumerMainThread((packet, ctx) -> ResponseRegionFromChunkPacket.handle(packet, ctx))
             .add();
     }
 }

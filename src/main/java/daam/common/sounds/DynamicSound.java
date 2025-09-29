@@ -7,6 +7,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.resources.sounds.AbstractTickableSoundInstance;
 import net.minecraft.client.resources.sounds.SoundInstance;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundSource;
 
 public class DynamicSound extends AbstractTickableSoundInstance {
@@ -20,7 +21,7 @@ public class DynamicSound extends AbstractTickableSoundInstance {
     private boolean finallyStop = false;
 
     public DynamicSound(String soundIn, boolean flag) {
-        super(new ResourceLocation(soundIn), SoundSource.MASTER, SoundInstance.createUnseededRandom());
+        super(SoundEvent.createFixedRangeEvent(new ResourceLocation(soundIn), 16.0f), SoundSource.MASTER, SoundInstance.createUnseededRandom());
         this.volume = 0.01f;
         this.flag = flag;
         this.looping = true;

@@ -11,6 +11,8 @@ public class RegionHandler {
     public static ArrayList<String> loadedSounds = new ArrayList<>();
     public static boolean hidden = true;
     public static Region currentRegion;
+    
+    public static RegionSoundHandler soundHandler = new RegionSoundHandler();
 
     public static void loadSounds() {
         loadedSounds.clear();

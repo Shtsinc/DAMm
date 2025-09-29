@@ -6,6 +6,7 @@ import daam.common.items.ItemRegister;
 import daam.common.network.NetworkHandler;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.CreativeModeTab;
+import net.minecraft.world.item.CreativeModeTabs;
 import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.common.MinecraftForge;
@@ -40,8 +41,7 @@ public class DAAM {
     public static final Logger LOGGER = LogManager.getLogger(MODID);
     public static final NetworkHandler NETWORK = new NetworkHandler();
     
-    public static final DeferredRegister<CreativeModeTab> CREATIVE_MODE_TABS = 
-        DeferredRegister.create(ForgeRegistries.CREATIVE_MODE_TABS, MODID);
+    // Creative tabs will be handled via BuildCreativeModeTabContentsEvent
     
     public static File DAAM_DIR;
     public static File SOUNDS_DIR;
@@ -59,7 +59,6 @@ public class DAAM {
         ItemRegister.ITEMS.register(modEventBus);
         BlockRegister.BLOCKS.register(modEventBus);
         BlockRegister.BLOCK_ITEMS.register(modEventBus);
-        CREATIVE_MODE_TABS.register(modEventBus);
         
         // Register ourselves for server and other game events we are interested in
         MinecraftForge.EVENT_BUS.register(this);
@@ -118,7 +117,7 @@ public class DAAM {
 
     @SubscribeEvent
     public void buildContents(BuildCreativeModeTabContentsEvent event) {
-        if (event.getTabKey() == CreativeModeTab.TAB_TOOLS_AND_UTILITIES.getKey()) {
+        if (event.getTabKey().equals(CreativeModeTabs.TOOLS_AND_UTILITIES)) {
             event.accept(ItemRegister.REGION_EDITOR);
             event.accept(ItemRegister.REGION_CREATOR);
             event.accept(ItemRegister.VOLUME_EDITOR);

@@ -15,9 +15,6 @@ public class SimpleNBTPacket extends SimplePacket {
         buf.writeNbt(compound);
     }
 
-    @Override
-    public void decode(FriendlyByteBuf buf) {
-        // This method is not used in the new system - use static decode methods instead
-    }
+
 
 }
