@@ -15,6 +15,7 @@ import java.util.UUID;
 public class GuiRegionCreator extends Screen {
     
     private final AABB regionBounds;
+    private final daam.common.items.RegionWand regionWand;
     private EditBox nameField;
     private EditBox musicDayField;
     private EditBox musicNightField;
@@ -25,9 +26,10 @@ public class GuiRegionCreator extends Screen {
     private int startY = 30;
     private int spacing = 25;
 
-    public GuiRegionCreator(AABB regionBounds) {
+    public GuiRegionCreator(AABB regionBounds, daam.common.items.RegionWand regionWand) {
         super(Component.literal("Create New Region"));
         this.regionBounds = regionBounds;
+        this.regionWand = regionWand;
     }
 
     @Override
@@ -92,6 +94,12 @@ public class GuiRegionCreator extends Screen {
             // Send to server
             NetworkHandler.INSTANCE.sendToServer(new CreateRegionPacket(region));
             DAAM.LOGGER.info("Region packet sent successfully!");
+            
+            // Reset positions in RegionWand after successful creation
+            if (regionWand != null) {
+                regionWand.resetPositions();
+                DAAM.LOGGER.info("RegionWand positions reset after successful region creation");
+            }
         } catch (Exception e) {
             DAAM.LOGGER.error("Failed to send region packet: " + e.getMessage(), e);
         }

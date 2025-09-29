@@ -29,6 +29,11 @@ public class RegionWand extends Item {
     public RegionWand() {
         super(new Item.Properties().stacksTo(1));
     }
+    
+    public void resetPositions() {
+        firstPos = null;
+        secondPos = null;
+    }
 
     @Override
     public InteractionResult useOn(UseOnContext context) {
@@ -69,11 +74,8 @@ public class RegionWand extends Item {
             AABB regionBounds = new AABB(minX, minY, minZ, maxX, maxY, maxZ);
             
             // Open region creator GUI
-            Minecraft.getInstance().setScreen(new GuiRegionCreator(regionBounds));
-            
-            // Reset positions
-            firstPos = null;
-            secondPos = null;
+            GuiRegionCreator gui = new GuiRegionCreator(regionBounds, this);
+            Minecraft.getInstance().setScreen(gui);
         } else if (level.isClientSide) {
             player.sendSystemMessage(Component.literal("You need to select two positions first! Right-click and Shift+Right-click on blocks.").withStyle(ChatFormatting.RED));
         }
