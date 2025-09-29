@@ -33,9 +33,22 @@ public class RegionEditor extends Item {
         if (level.isClientSide) {
             if (player.isShiftKeyDown()) {
                 RegionHandler.hidden = !RegionHandler.hidden;
+                player.sendSystemMessage(Component.literal("Region visibility: " + (!RegionHandler.hidden ? "SHOWN" : "HIDDEN")).withStyle(ChatFormatting.GOLD));
             } else {
                 if (RegionHandler.currentRegion != null) {
                     Minecraft.getInstance().setScreen(new GuiRegionEditor(RegionHandler.currentRegion));
+                } else {
+                    // Create a dummy region for testing
+                    daam.common.world.Region dummyRegion = new daam.common.world.Region();
+                    dummyRegion.setUUID("temp-region");
+                    dummyRegion.setNAME("Temporary Region");
+                    dummyRegion.setMUSIC_PATH_DAY("example_day_music");
+                    dummyRegion.setMUSIC_PATH_NIGHT("example_night_music");
+                    dummyRegion.setAMBIENT_PATH_DAY("example_day_ambient");
+                    dummyRegion.setAMBIENT_PATH_NIGHT("example_night_ambient");
+                    
+                    Minecraft.getInstance().setScreen(new GuiRegionEditor(dummyRegion));
+                    player.sendSystemMessage(Component.literal("Opened region editor (demo mode - you're not in a region)").withStyle(ChatFormatting.YELLOW));
                 }
             }
         }
