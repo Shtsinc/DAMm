@@ -1,111 +1,102 @@
 package daam.common.world;
 
 import daam.DAAM;
-import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.world.World;
-import net.minecraft.world.storage.WorldSavedData;
-import net.minecraftforge.event.world.WorldEvent;
-import net.minecraftforge.fml.common.FMLCommonHandler;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.level.saveddata.SavedData;
+import net.minecraftforge.event.level.LevelEvent;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-
-@Mod.EventBusSubscriber
-public class DAAMWorldSavedData extends WorldSavedData {
+@Mod.EventBusSubscriber(modid = DAAM.MODID)
+public class DAAMWorldSavedData extends SavedData {
 
     private static final String DATA_NAME = DAAM.MODID + "_data";
-
-    public ConcurrentHashMap<RegionChunks, Region> regions = new ConcurrentHashMap<>();
+    
+    public Map<RegionChunks, Region> regions = new ConcurrentHashMap<>();
 
     public DAAMWorldSavedData() {
-        super(DATA_NAME);
+        super();
     }
 
-    public DAAMWorldSavedData(String name) {
-        super(name);
+    public DAAMWorldSavedData(CompoundTag tag) {
+        super();
+        this.regions = readNBT(tag);
     }
 
-    /**
-     * Use only on SERVER SIDE !!!
-     *
-     * @param world
-     * @return DecorationWorldSavedData
-     */
-    public static DAAMWorldSavedData get(World world) {
-        DAAMWorldSavedData instance = (DAAMWorldSavedData) world.loadData(DAAMWorldSavedData.class, DATA_NAME);
-        if (instance == null) {
-            instance = new DAAMWorldSavedData();
-            world.setData(DATA_NAME, instance);
-        }
-        return instance;
+    public static DAAMWorldSavedData create() {
+        return new DAAMWorldSavedData();
     }
 
-    @SubscribeEvent
-    public static void onWorldLoadEvent(WorldEvent.Load event) {
-        if (FMLCommonHandler.instance().getSide().isServer() && event.getWorld().provider.getDimension() == 0) {
-            DAAMWorldSavedData.get(event.getWorld());
-        }
+    public static DAAMWorldSavedData load(CompoundTag tag) {
+        return new DAAMWorldSavedData(tag);
+    }
+
+    public static DAAMWorldSavedData get(ServerLevel level) {
+        return level.getDataStorage().computeIfAbsent(
+            DAAMWorldSavedData::load,
+            DAAMWorldSavedData::create,
+            DATA_NAME
+        );
     }
 
     @SubscribeEvent
-    public void worldSave(WorldEvent.Save event) {
-        if (FMLCommonHandler.instance().getSide().isServer() && event.getWorld().provider.getDimension() == 0) {
-            DAAMWorldSavedData.get(event.getWorld()).markDirty();
+    public static void onWorldLoadEvent(LevelEvent.Load event) {
+        if (event.getLevel() instanceof ServerLevel serverLevel) {
+            DAAMWorldSavedData data = get(serverLevel);
+            DAAM.LOGGER.info("Loaded DAAM world data for " + serverLevel.dimension().location());
+        }
+    }
+
+    @SubscribeEvent
+    public void worldSave(LevelEvent.Save event) {
+        if (event.getLevel() instanceof ServerLevel) {
+            this.setDirty();
         }
     }
 
     @Override
-    public void readFromNBT(NBTTagCompound compound) {
-        regions.clear();
-        for (String regionChunksString : compound.getKeySet()) {
-            NBTTagCompound regionNBT = compound.getCompoundTag(regionChunksString);
-
-            Region region = new Region();
-            region.deserializeNBT(regionNBT);
-
-            RegionChunks regionChunks = new RegionChunks(region.getUUID());
-            regionChunks.fromString(regionChunksString);
-
-            regions.put(regionChunks, region);
-        }
+    public CompoundTag save(CompoundTag compound) {
+        return writeNBT(new HashMap<>(regions));
     }
 
-    @Override
-    public NBTTagCompound writeToNBT(NBTTagCompound compound) {
-        for (Map.Entry<RegionChunks, Region> region : regions.entrySet()) {
-            compound.setTag(region.getKey().toString(), region.getValue().serializeNBT());
-        }
-        return compound;
-    }
-
-
-    public static HashMap<RegionChunks, Region> readNBT(NBTTagCompound compound) {
+    public static HashMap<RegionChunks, Region> readNBT(CompoundTag compound) {
         HashMap<RegionChunks, Region> regions = new HashMap<>();
-        for (String regionChunksString : compound.getKeySet()) {
-            NBTTagCompound regionNBT = compound.getCompoundTag(regionChunksString);
-
+        
+        if (!compound.contains("regions")) {
+            return regions;
+        }
+        
+        CompoundTag regionsTag = compound.getCompound("regions");
+        for (String key : regionsTag.getAllKeys()) {
+            CompoundTag regionCompound = regionsTag.getCompound(key);
             Region region = new Region();
-            region.deserializeNBT(regionNBT);
-
-            RegionChunks regionChunks = new RegionChunks(region.getUUID());
-            regionChunks.fromString(regionChunksString);
-
+            region.deserializeNBT(regionCompound.getCompound("region"));
+            
+            RegionChunks regionChunks = new RegionChunks(region.getUUID(), null, region.getAABB());
             regions.put(regionChunks, region);
         }
+        
         return regions;
     }
 
-
-    public static NBTTagCompound writeNBT(HashMap<RegionChunks, Region> regions) {
-        NBTTagCompound compound = new NBTTagCompound();
-        for (Map.Entry<RegionChunks, Region> region : regions.entrySet()) {
-            compound.setTag(region.getKey().toString(), region.getValue().serializeNBT());
+    public static CompoundTag writeNBT(HashMap<RegionChunks, Region> regions) {
+        CompoundTag compound = new CompoundTag();
+        CompoundTag regionsTag = new CompoundTag();
+        
+        int index = 0;
+        for (Map.Entry<RegionChunks, Region> entry : regions.entrySet()) {
+            CompoundTag regionEntry = new CompoundTag();
+            regionEntry.put("region", entry.getValue().serializeNBT());
+            regionsTag.put("region_" + index, regionEntry);
+            index++;
         }
+        
+        compound.put("regions", regionsTag);
         return compound;
     }
-
 }

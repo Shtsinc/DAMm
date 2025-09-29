@@ -13,8 +13,6 @@ import java.util.function.Supplier;
 public abstract class SimplePacket {
 
     public abstract void encode(FriendlyByteBuf buf);
-    
-    public abstract void decode(FriendlyByteBuf buf);
 
     public void handle(Supplier<NetworkEvent.Context> contextSupplier) {
         NetworkEvent.Context context = contextSupplier.get();

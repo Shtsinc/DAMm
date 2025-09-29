@@ -1,6 +1,7 @@
 package daam.common.network.packets.client;
 
 import daam.common.network.packets.SimplePacket;
+import daam.common.world.Region;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraftforge.network.NetworkEvent;
 
@@ -10,6 +11,10 @@ public class SyncRegionPacket extends SimplePacket {
 
     public SyncRegionPacket() {
         // TODO: Port from 1.12.2 to 1.20.1
+    }
+    
+    public SyncRegionPacket(Region region) {
+        // TODO: Implement region synchronization
     }
 
     public static void encode(SyncRegionPacket packet, FriendlyByteBuf buf) {

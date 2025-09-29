@@ -1,24 +1,23 @@
 package daam.common.network.packets;
 
-import io.netty.buffer.ByteBuf;
-import net.minecraft.nbt.NBTTagCompound;
-import net.minecraftforge.fml.common.network.ByteBufUtils;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.FriendlyByteBuf;
 
 public class SimpleNBTPacket extends SimplePacket {
 
-    protected NBTTagCompound compound;
+    protected CompoundTag compound;
 
     public SimpleNBTPacket() {
     }
 
     @Override
-    public void toBytes(ByteBuf buf) {
-        ByteBufUtils.writeTag(buf, compound);
+    public void encode(FriendlyByteBuf buf) {
+        buf.writeNbt(compound);
     }
 
     @Override
-    public void fromBytes(ByteBuf buf) {
-        this.compound = ByteBufUtils.readTag(buf);
+    public void decode(FriendlyByteBuf buf) {
+        // This method is not used in the new system - use static decode methods instead
     }
 
 }

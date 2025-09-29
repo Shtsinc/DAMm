@@ -2,9 +2,10 @@ package daam.common.world;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import net.minecraft.util.math.AxisAlignedBB;
-import net.minecraft.world.World;
-import net.minecraft.world.chunk.Chunk;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.level.ChunkPos;
+import net.minecraft.world.level.chunk.LevelChunk;
+import net.minecraft.world.phys.AABB;
 
 import java.util.ArrayList;
 
@@ -21,64 +22,77 @@ public class RegionChunks {
         this.UUID = uuid;
     }
 
-    public RegionChunks(String uuid, World world, AxisAlignedBB aabb) {
+    public RegionChunks(String uuid, ServerLevel world, AABB aabb) {
         this.UUID = uuid;
-        ArrayList<Chunk> chunks = getChunksFromAABB(world, aabb);
-        chunks.forEach(this::addChunk);
+        if (world != null) {
+            ArrayList<LevelChunk> chunks = getChunksFromAABB(world, aabb);
+            chunks.forEach(this::addChunk);
+        }
     }
 
-    public void addChunk(Chunk chunk) {
-        chunks.add(String.format(PATTERN, chunk.x, chunk.z));
+    public void addChunk(LevelChunk chunk) {
+        chunks.add(String.format(PATTERN, chunk.getPos().x, chunk.getPos().z));
     }
 
-    public boolean equalsWithChunk(Chunk chunk) {
-        String formatted = String.format(PATTERN, chunk.x, chunk.z);
-        for (String string : chunks) {
-            if (formatted.equals(string)) {
-                return true;
-            }
+    public boolean equalsWithChunk(LevelChunk chunk) {
+        String chunkString = String.format(PATTERN, chunk.getPos().x, chunk.getPos().z);
+        return chunks.contains(chunkString);
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj instanceof RegionChunks other) {
+            return other.UUID.equals(this.UUID);
         }
         return false;
     }
 
-    public void fromString(String chunks) {
-        RegionChunks json = GSON.fromJson(chunks, RegionChunks.class);
-        this.UUID = json.UUID;
-        this.chunks = json.chunks;
+    @Override
+    public int hashCode() {
+        return UUID.hashCode();
     }
 
+    @Override
     public String toString() {
         return GSON.toJson(this);
     }
 
-    public ArrayList<Chunk> getChunksFromAABB(World world, AxisAlignedBB aabb) {
-        ArrayList<Chunk> chunks = new ArrayList<>();
-
-        int minX = ((int) aabb.minX) >> 4;
-        int maxX = ((int) aabb.maxX) >> 4;
-        int minZ = ((int) aabb.minZ) >> 4;
-        int maxZ = ((int) aabb.maxZ) >> 4;
-
-        for (int x = minX; x <= maxX; x++) {
-            for (int z = minZ; z <= maxZ; z++) {
-                chunks.add(world.getChunk(x, z));
-            }
+    public ArrayList<LevelChunk> getChunksFromAABB(ServerLevel world, AABB aabb) {
+        ArrayList<LevelChunk> chunks = new ArrayList<>();
+        
+        if (world == null || aabb == null) {
+            return chunks;
         }
 
+        int minChunkX = (int) Math.floor(aabb.minX / 16.0);
+        int maxChunkX = (int) Math.floor(aabb.maxX / 16.0);
+        int minChunkZ = (int) Math.floor(aabb.minZ / 16.0);
+        int maxChunkZ = (int) Math.floor(aabb.maxZ / 16.0);
+
+        for (int x = minChunkX; x <= maxChunkX; x++) {
+            for (int z = minChunkZ; z <= maxChunkZ; z++) {
+                ChunkPos chunkPos = new ChunkPos(x, z);
+                if (world.hasChunk(x, z)) {
+                    LevelChunk chunk = world.getChunk(x, z);
+                    chunks.add(chunk);
+                }
+            }
+        }
+        
         return chunks;
     }
 
-    public boolean allChunksUnload(World world) {
-        for (String chunk : chunks) {
-            String[] xz = chunk.split(",");
-            int x = Integer.parseInt(xz[0]);
-            int z = Integer.parseInt(xz[1]);
-            boolean loaded = world.getChunkProvider().isChunkGeneratedAt(x, z);
-            if (loaded) {
+    public boolean allChunksUnload(ServerLevel world) {
+        if (world == null) return true;
+        
+        for (String chunkString : chunks) {
+            String[] split = chunkString.split(",");
+            int x = Integer.parseInt(split[0]);
+            int z = Integer.parseInt(split[1]);
+            if (world.hasChunk(x, z)) {
                 return false;
             }
         }
         return true;
     }
-
 }
