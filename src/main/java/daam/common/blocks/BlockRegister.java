@@ -1,9 +1,11 @@
 package daam.common.blocks;
 
 import daam.DAAM;
+import daam.common.tile.SoundBlockTileEntity;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.ForgeRegistries;
 import net.minecraftforge.registries.RegistryObject;
@@ -17,6 +19,9 @@ public class BlockRegister {
     
     public static final DeferredRegister<Item> BLOCK_ITEMS = 
         DeferredRegister.create(ForgeRegistries.ITEMS, DAAM.MODID);
+    
+    public static final DeferredRegister<BlockEntityType<?>> BLOCK_ENTITY_TYPES = 
+        DeferredRegister.create(ForgeRegistries.BLOCK_ENTITY_TYPES, DAAM.MODID);
 
     // Light blocks for each level (0-15)
     public static final RegistryObject<LightBlock> LIGHT_BLOCK_0 = registerLightBlock(0);
@@ -39,6 +44,16 @@ public class BlockRegister {
     // Sound block
     public static final RegistryObject<SoundBlock> SOUND_BLOCK = registerBlock("sound_block", 
         () -> new SoundBlock());
+    
+    // Block Entity Types
+    public static final RegistryObject<BlockEntityType<SoundBlockTileEntity>> SOUND_BLOCK_ENTITY = 
+        BLOCK_ENTITY_TYPES.register("sound_block", () -> {
+            BlockEntityType<SoundBlockTileEntity> type = BlockEntityType.Builder.of(
+                (pos, state) -> new SoundBlockTileEntity(pos, state), 
+                SOUND_BLOCK.get()
+            ).build(null);
+            return type;
+        });
 
     private static RegistryObject<LightBlock> registerLightBlock(int level) {
         return registerBlock("light_lv" + level, () -> new LightBlock(level));

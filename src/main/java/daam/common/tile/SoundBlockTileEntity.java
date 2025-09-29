@@ -1,5 +1,6 @@
 package daam.common.tile;
 
+import daam.common.blocks.BlockRegister;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.level.block.entity.BlockEntity;
@@ -8,6 +9,10 @@ import net.minecraft.world.level.block.state.BlockState;
 
 public class SoundBlockTileEntity extends BlockEntity {
 
+    public SoundBlockTileEntity(BlockPos pos, BlockState state) {
+        super(BlockRegister.SOUND_BLOCK_ENTITY.get(), pos, state);
+    }
+    
     public SoundBlockTileEntity(BlockEntityType<?> type, BlockPos pos, BlockState state) {
         super(type, pos, state);
     }

@@ -59,6 +59,7 @@ public class DAAM {
         ItemRegister.ITEMS.register(modEventBus);
         BlockRegister.BLOCKS.register(modEventBus);
         BlockRegister.BLOCK_ITEMS.register(modEventBus);
+        BlockRegister.BLOCK_ENTITY_TYPES.register(modEventBus);
         
         // Register ourselves for server and other game events we are interested in
         MinecraftForge.EVENT_BUS.register(this);

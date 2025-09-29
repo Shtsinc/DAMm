@@ -23,7 +23,8 @@ public class PlayerRegionHandler {
     
     // Track current region for each player
     private static final Map<String, String> playerCurrentRegions = new HashMap<>();
-    private static int tickCounter = 0;
+    // Track tick counter per player to avoid issues with multiple players
+    private static final Map<String, Integer> playerTickCounters = new HashMap<>();
     
     @SubscribeEvent
     public static void onPlayerTick(TickEvent.PlayerTickEvent event) {
@@ -31,8 +32,11 @@ public class PlayerRegionHandler {
             return;
         }
         
+        String playerUUID = serverPlayer.getUUID().toString();
+        
         // Only check every 20 ticks (1 second) to avoid performance issues
-        tickCounter++;
+        int tickCounter = playerTickCounters.getOrDefault(playerUUID, 0) + 1;
+        playerTickCounters.put(playerUUID, tickCounter);
         if (tickCounter % 20 != 0) {
             return;
         }
@@ -41,7 +45,6 @@ public class PlayerRegionHandler {
         DAAMWorldSavedData worldData = DAAMWorldSavedData.get(level);
         
         BlockPos playerPos = serverPlayer.blockPosition();
-        String playerUUID = serverPlayer.getUUID().toString();
         
         // Find region at player position
         Region foundRegion = findRegionAtPosition(playerPos, worldData);
@@ -84,6 +87,8 @@ public class PlayerRegionHandler {
     
     // Clean up when player disconnects
     public static void onPlayerDisconnect(ServerPlayer player) {
-        playerCurrentRegions.remove(player.getUUID().toString());
+        String playerUUID = player.getUUID().toString();
+        playerCurrentRegions.remove(playerUUID);
+        playerTickCounters.remove(playerUUID);
     }
 }

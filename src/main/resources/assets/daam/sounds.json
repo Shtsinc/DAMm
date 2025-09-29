@@ -1,0 +1,22 @@
+{
+  "test_music_day": {
+    "sounds": [
+      "daam:test_music_day"
+    ]
+  },
+  "test_music_night": {
+    "sounds": [
+      "daam:test_music_night"
+    ]
+  },
+  "test_ambient_day": {
+    "sounds": [
+      "daam:test_ambient_day"
+    ]
+  },
+  "test_ambient_night": {
+    "sounds": [
+      "daam:test_ambient_night"
+    ]
+  }
+}

@@ -1,5 +1,6 @@
 package daam.common.blocks;
 
+import daam.client.RegionHandler;
 import lombok.Getter;
 import lombok.Setter;
 import net.minecraft.core.BlockPos;
@@ -17,9 +18,7 @@ import net.minecraft.world.phys.shapes.VoxelShape;
 
 public class LightBlock extends Block {
 
-    @Setter
-    @Getter
-    private static boolean hidden = true;
+    // Remove local hidden field - use RegionHandler.hidden instead
     
     public static final BooleanProperty HIDDEN = BooleanProperty.create("hidden");
     private final int level;
@@ -35,7 +34,7 @@ public class LightBlock extends Block {
             .strength(-1.0F, 3600000.0F) // Unbreakable
             .noLootTable());
         this.level = level;
-        this.registerDefaultState(this.stateDefinition.any().setValue(HIDDEN, hidden));
+        this.registerDefaultState(this.stateDefinition.any().setValue(HIDDEN, RegionHandler.hidden));
     }
 
     @Override
@@ -71,5 +70,9 @@ public class LightBlock extends Block {
     @Override
     public boolean useShapeForLightOcclusion(BlockState state) {
         return true;
+    }
+    
+    private boolean isHidden() {
+        return RegionHandler.hidden;
     }
 }

@@ -1,6 +1,7 @@
 package daam.common.blocks;
 
 import daam.client.DrawUtils;
+import daam.client.RegionHandler;
 import daam.client.screens.GuiSoundEditor;
 import daam.common.items.SoundStick;
 import daam.common.tile.SoundBlockTileEntity;
@@ -31,9 +32,7 @@ import javax.annotation.Nullable;
 
 public class SoundBlock extends BaseEntityBlock {
 
-    @Setter
-    @Getter
-    private static boolean hidden = true;
+    // Remove local hidden field - use RegionHandler.hidden instead
     
     public static final BooleanProperty HIDDEN = BooleanProperty.create("hidden");
     protected static final VoxelShape EMPTY_SHAPE = Shapes.empty();
@@ -45,7 +44,7 @@ public class SoundBlock extends BaseEntityBlock {
             .noOcclusion()
             .strength(-1.0F, 3600000.0F) // Unbreakable
             .noLootTable());
-        this.registerDefaultState(this.stateDefinition.any().setValue(HIDDEN, hidden));
+        this.registerDefaultState(this.stateDefinition.any().setValue(HIDDEN, RegionHandler.hidden));
     }
 
     @Override
@@ -72,7 +71,7 @@ public class SoundBlock extends BaseEntityBlock {
     @Nullable
     @Override
     public BlockEntity newBlockEntity(BlockPos pos, BlockState state) {
-        return new SoundBlockTileEntity(null, pos, state); // TODO: Add BlockEntityType
+        return new SoundBlockTileEntity(pos, state);
     }
 
     @Override
@@ -103,5 +102,9 @@ public class SoundBlock extends BaseEntityBlock {
     @Override
     public boolean useShapeForLightOcclusion(BlockState state) {
         return true;
+    }
+    
+    private boolean isHidden() {
+        return RegionHandler.hidden;
     }
 }

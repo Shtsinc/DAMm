@@ -19,10 +19,21 @@ public class DynamicSound extends AbstractTickableSoundInstance {
     private boolean finallyStop = false;
 
     public DynamicSound(String soundIn, boolean flag) {
-        super(SoundEvent.createFixedRangeEvent(new ResourceLocation(soundIn), 16.0f), SoundSource.MASTER, SoundInstance.createUnseededRandom());
+        super(createSoundEvent(soundIn), SoundSource.MASTER, SoundInstance.createUnseededRandom());
         this.volume = 0.01f;
         this.flag = flag;
         this.looping = true;
+    }
+    
+    private static SoundEvent createSoundEvent(String soundPath) {
+        if (soundPath == null || soundPath.isEmpty()) {
+            // Return a default silent sound event if no path provided
+            return SoundEvent.createFixedRangeEvent(new ResourceLocation("minecraft", "intentionally_empty"), 16.0f);
+        }
+        
+        // Create proper DAAM sound resource location
+        ResourceLocation soundLocation = new ResourceLocation("daam", soundPath);
+        return SoundEvent.createFixedRangeEvent(soundLocation, 16.0f);
     }
 
     @Override
