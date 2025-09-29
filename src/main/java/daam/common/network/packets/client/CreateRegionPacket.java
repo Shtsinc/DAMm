@@ -20,11 +20,16 @@ public class CreateRegionPacket extends SimplePacket {
     }
 
     public CreateRegionPacket(Region region) {
-        this.regionData = region.serializeNBT();
+        if (region != null) {
+            this.regionData = region.serializeNBT();
+        } else {
+            this.regionData = new CompoundTag();
+        }
     }
 
     public static void encode(CreateRegionPacket packet, FriendlyByteBuf buf) {
-        buf.writeNbt(packet.regionData);
+        CompoundTag data = packet.regionData != null ? packet.regionData : new CompoundTag();
+        buf.writeNbt(data);
     }
 
     public static CreateRegionPacket decode(FriendlyByteBuf buf) {
@@ -45,8 +50,10 @@ public class CreateRegionPacket extends SimplePacket {
                 savedData.regions.put(new RegionChunks(region.getUUID(), player.serverLevel(), region.getAABB()), region);
                 savedData.setDirty();
 
-                // Sync to all players
-                NetworkHandler.INSTANCE.send(PacketDistributor.ALL.noArg(), new SyncRegionPacket(region));
+                // TODO: Sync to all players when SyncRegionPacket is implemented
+                // NetworkHandler.INSTANCE.send(PacketDistributor.ALL.noArg(), new SyncRegionPacket(region));
+                
+                player.sendSystemMessage(net.minecraft.network.chat.Component.literal("Region created successfully: " + region.getNAME()).withStyle(net.minecraft.ChatFormatting.GREEN));
             }
         });
         context.setPacketHandled(true);

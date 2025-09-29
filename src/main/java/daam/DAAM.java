@@ -108,7 +108,7 @@ public class DAAM {
         LOGGER.info("   ',   _,.-·'´:\\\\:\\\\'     \\\\*´\\\\:::;'      \\\\·-;::\\\\:::::'`:·-.,';        ,' ,'::::\\\\·²*'´¨¯':,'\\\\:;         \\\\`*ª'´\\\\\\\\::/'         ");
         LOGGER.info("    \\\\¨:::::::::::\\\\';      '\\\\::\\\\:;'        \\\\::\\\\:;'` ·:;:::::\\\\::\\\\'      \\\\`¨\\\\:::/          \\\\::\\\\'          '\\\\:::::\\\\';  '        ");
         
-        NETWORK.registry();
+        NetworkHandler.registry();
     }
 
     private void clientSetup(final FMLClientSetupEvent event) {

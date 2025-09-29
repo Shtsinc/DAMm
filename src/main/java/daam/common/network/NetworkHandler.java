@@ -21,7 +21,7 @@ public class NetworkHandler {
     
     private static int packetId = 0;
     
-    public void registry() {
+    public static void registry() {
         // Client to Server packets
         INSTANCE.messageBuilder(CreateRegionPacket.class, packetId++, NetworkDirection.PLAY_TO_SERVER)
             .decoder(CreateRegionPacket::decode)

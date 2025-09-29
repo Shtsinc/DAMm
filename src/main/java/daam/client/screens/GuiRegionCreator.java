@@ -78,17 +78,23 @@ public class GuiRegionCreator extends Screen {
         // Create new region
         Region region = new Region();
         region.setUUID(UUID.randomUUID().toString());
-        region.setNAME(nameField.getValue());
-        region.setMUSIC_PATH_DAY(musicDayField.getValue());
-        region.setMUSIC_PATH_NIGHT(musicNightField.getValue());
-        region.setAMBIENT_PATH_DAY(ambientDayField.getValue());
-        region.setAMBIENT_PATH_NIGHT(ambientNightField.getValue());
+        region.setNAME(nameField.getValue() != null ? nameField.getValue() : "New Region");
+        region.setMUSIC_PATH_DAY(musicDayField.getValue() != null ? musicDayField.getValue() : "");
+        region.setMUSIC_PATH_NIGHT(musicNightField.getValue() != null ? musicNightField.getValue() : "");
+        region.setAMBIENT_PATH_DAY(ambientDayField.getValue() != null ? ambientDayField.getValue() : "");
+        region.setAMBIENT_PATH_NIGHT(ambientNightField.getValue() != null ? ambientNightField.getValue() : "");
         region.setAABB(regionBounds);
+        region.setTIME_FACTOR(true); // Set default time factor
         
-        // Send to server
-        NetworkHandler.INSTANCE.sendToServer(new CreateRegionPacket(region));
+        DAAM.LOGGER.info("Creating region: " + region.getNAME() + " with bounds: " + regionBounds);
         
-        DAAM.LOGGER.info("Created region: " + region.getNAME() + " with bounds: " + regionBounds);
+        try {
+            // Send to server
+            NetworkHandler.INSTANCE.sendToServer(new CreateRegionPacket(region));
+            DAAM.LOGGER.info("Region packet sent successfully!");
+        } catch (Exception e) {
+            DAAM.LOGGER.error("Failed to send region packet: " + e.getMessage(), e);
+        }
     }
 
     @Override
