@@ -1,39 +1,53 @@
 package daam.client;
 
-import net.minecraft.client.settings.KeyBinding;
-import net.minecraftforge.fml.client.registry.ClientRegistry;
+import net.minecraft.client.KeyMapping;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.client.event.RegisterKeyMappingsEvent;
+import net.minecraftforge.event.TickEvent;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
-import net.minecraftforge.fml.common.gameevent.InputEvent;
-import net.minecraftforge.fml.relauncher.Side;
-import org.lwjgl.input.Keyboard;
+import org.lwjgl.glfw.GLFW;
 
-@Mod.EventBusSubscriber(Side.CLIENT)
+@Mod.EventBusSubscriber(modid = "daam", bus = Mod.EventBusSubscriber.Bus.FORGE, value = Dist.CLIENT)
 public class KeyHandler {
 
     private static final String CATEGORY = "key.categories.daam";
 
-    public static final KeyBinding musicBinding = new KeyBinding("key.daam.music_mute", Keyboard.KEY_LBRACKET, CATEGORY);
-    public static final KeyBinding ambientBinding = new KeyBinding("key.daam.ambient_mute", Keyboard.KEY_RBRACKET, CATEGORY);
+    public static final KeyMapping musicBinding = new KeyMapping(
+        "key.daam.music_mute", 
+        GLFW.GLFW_KEY_LEFT_BRACKET, 
+        CATEGORY
+    );
+    
+    public static final KeyMapping ambientBinding = new KeyMapping(
+        "key.daam.ambient_mute", 
+        GLFW.GLFW_KEY_RIGHT_BRACKET, 
+        CATEGORY
+    );
 
-    static {
-        ClientRegistry.registerKeyBinding(musicBinding);
-        ClientRegistry.registerKeyBinding(ambientBinding);
+    @SubscribeEvent
+    public static void registerKeyMappings(RegisterKeyMappingsEvent event) {
+        event.register(musicBinding);
+        event.register(ambientBinding);
     }
 
     @SubscribeEvent
-    public static void onKeyInput(InputEvent.KeyInputEvent event) {
-        if (musicBinding.isPressed()) {
+    public static void onClientTick(TickEvent.ClientTickEvent event) {
+        if (event.phase != TickEvent.Phase.END) return;
+        
+        // Check key presses
+        while (musicBinding.consumeClick()) {
             RegionSoundHandler.musicMute = !RegionSoundHandler.musicMute;
             RegionSoundHandler handler = RegionHandler.soundHandler;
-            if (handler.currentRegion != null) {
+            if (handler != null && handler.currentRegion != null) {
                 handler.switchRegion(handler.currentRegion);
             }
         }
-        if (ambientBinding.isPressed()) {
+        
+        while (ambientBinding.consumeClick()) {
             RegionSoundHandler.ambientMute = !RegionSoundHandler.ambientMute;
             RegionSoundHandler handler = RegionHandler.soundHandler;
-            if (handler.currentRegion != null) {
+            if (handler != null && handler.currentRegion != null) {
                 handler.switchRegion(handler.currentRegion);
             }
         }

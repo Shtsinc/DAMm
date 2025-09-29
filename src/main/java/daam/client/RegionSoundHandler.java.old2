@@ -3,7 +3,8 @@ package daam.client;
 import daam.common.sounds.DynamicSound;
 import daam.common.world.Region;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.sounds.SoundManager;
+import net.minecraft.client.audio.SoundHandler;
+import net.minecraft.client.audio.SoundManager;
 
 public class RegionSoundHandler {
 
@@ -11,7 +12,7 @@ public class RegionSoundHandler {
     public static float ambientVolume = 1F;
     public static boolean musicMute = false;
     public static boolean ambientMute = false;
-    public SoundManager sound;
+    public SoundHandler sound;
     public Region currentRegion;
     public DynamicSound dynamicMusicDay;
     public DynamicSound dynamicAmbientDay;
@@ -20,7 +21,7 @@ public class RegionSoundHandler {
     private boolean isDay;
 
     public void tick(Region updatedRegion) {
-        long time = Minecraft.getInstance().level.getGameTime() % 24000;
+        long time = Minecraft.getMinecraft().world.getWorldTime() % 24000;
         boolean isDay = !(time >= 13000 && time <= 23000);
         if (this.isDay != isDay) {
             if (!updatedRegion.isTIME_FACTOR()) {
@@ -33,7 +34,7 @@ public class RegionSoundHandler {
         }
         this.isDay = isDay;
 
-        sound = Minecraft.getInstance().getSoundManager();
+        sound = Minecraft.getMinecraft().getSoundHandler();
 
         if (currentRegion == null) {
             this.currentRegion = updatedRegion;
@@ -49,33 +50,46 @@ public class RegionSoundHandler {
 
         if (isDay || !updatedRegion.isTIME_FACTOR()) {
             if (dynamicMusicDay != null) {
-                boolean flag = sound.isActive(dynamicMusicDay);
-                if (!flag && !musicMute) {
-                    sound.play(dynamicMusicDay);
+                boolean flag = sound.isSoundPlaying(dynamicMusicDay);
+                boolean flag2 = SoundManager.UNABLE_TO_PLAY.contains(dynamicMusicDay.getSoundLocation());
+                if (!flag && !flag2 && !musicMute) {
+                    if (!sound.sndManager.playingSounds.containsValue(dynamicMusicDay)) {
+                        sound.playSound(dynamicMusicDay);
+                    }
                 }
             }
 
             if (dynamicAmbientDay != null) {
-                boolean flag = sound.isActive(dynamicAmbientDay);
-                if (!flag && !ambientMute) {
-                    sound.play(dynamicAmbientDay);
+                boolean flag = sound.isSoundPlaying(dynamicAmbientDay);
+                boolean flag2 = SoundManager.UNABLE_TO_PLAY.contains(dynamicAmbientDay.getSoundLocation());
+                if (!flag && !flag2 && !ambientMute) {
+                    if (!sound.sndManager.playingSounds.containsValue(dynamicAmbientDay)) {
+                        sound.playSound(dynamicAmbientDay);
+                    }
                 }
             }
         } else {
             if (dynamicMusicNight != null) {
-                boolean flag = sound.isActive(dynamicMusicNight);
-                if (!flag && !musicMute) {
-                    sound.play(dynamicMusicNight);
+                boolean flag = sound.isSoundPlaying(dynamicMusicNight);
+                boolean flag2 = SoundManager.UNABLE_TO_PLAY.contains(dynamicMusicNight.getSoundLocation());
+                if (!flag && !flag2 && !musicMute) {
+                    if (!sound.sndManager.playingSounds.containsValue(dynamicMusicNight)) {
+                        sound.playSound(dynamicMusicNight);
+                    }
                 }
             }
 
             if (dynamicAmbientNight != null) {
-                boolean flag = sound.isActive(dynamicAmbientNight);
-                if (!flag && !ambientMute) {
-                    sound.play(dynamicAmbientNight);
+                boolean flag = sound.isSoundPlaying(dynamicAmbientNight);
+                boolean flag2 = SoundManager.UNABLE_TO_PLAY.contains(dynamicAmbientNight.getSoundLocation());
+                if (!flag && !flag2 && !ambientMute) {
+                    if (!sound.sndManager.playingSounds.containsValue(dynamicAmbientNight)) {
+                        sound.playSound(dynamicAmbientNight);
+                    }
                 }
             }
         }
+
     }
 
     public void stopAll() {
@@ -128,11 +142,11 @@ public class RegionSoundHandler {
                 }
                 dynamicMusicDay = null;
             } else {
-                if ((dynamicMusicDay == null || !dynamicMusicDay.getLocation().equals(updatedMusic.getLocation()))) {
+                if ((dynamicMusicDay == null || !dynamicMusicDay.getSoundLocation().equals(updatedMusic.getSoundLocation()))) {
                     if (dynamicMusicDay != null) {
                         dynamicMusicDay.setStop(true);
                     }
-                    sound.play(updatedMusic);
+                    sound.playSound(updatedMusic);
                     dynamicMusicDay = updatedMusic;
                 }
             }
@@ -143,11 +157,11 @@ public class RegionSoundHandler {
                 }
                 dynamicAmbientDay = null;
             } else {
-                if (dynamicAmbientDay == null || !dynamicAmbientDay.getLocation().equals(updatedAmbient.getLocation())) {
+                if (dynamicAmbientDay == null || !dynamicAmbientDay.getSoundLocation().equals(updatedAmbient.getSoundLocation())) {
                     if (dynamicAmbientDay != null) {
                         dynamicAmbientDay.setStop(true);
                     }
-                    sound.play(updatedAmbient);
+                    sound.playSound(updatedAmbient);
                     dynamicAmbientDay = updatedAmbient;
                 }
             }
@@ -161,11 +175,11 @@ public class RegionSoundHandler {
                 }
                 dynamicMusicNight = null;
             } else {
-                if ((dynamicMusicNight == null || !dynamicMusicNight.getLocation().equals(updatedMusic.getLocation()))) {
+                if ((dynamicMusicNight == null || !dynamicMusicNight.getSoundLocation().equals(updatedMusic.getSoundLocation()))) {
                     if (dynamicMusicNight != null) {
                         dynamicMusicNight.setStop(true);
                     }
-                    sound.play(updatedMusic);
+                    sound.playSound(updatedMusic);
                     dynamicMusicNight = updatedMusic;
                 }
             }
@@ -176,14 +190,16 @@ public class RegionSoundHandler {
                 }
                 dynamicAmbientNight = null;
             } else {
-                if (dynamicAmbientNight == null || !dynamicAmbientNight.getLocation().equals(updatedAmbient.getLocation())) {
+                if (dynamicAmbientNight == null || !dynamicAmbientNight.getSoundLocation().equals(updatedAmbient.getSoundLocation())) {
                     if (dynamicAmbientNight != null) {
                         dynamicAmbientNight.setStop(true);
                     }
-                    sound.play(updatedAmbient);
+                    sound.playSound(updatedAmbient);
                     dynamicAmbientNight = updatedAmbient;
                 }
             }
         }
+
     }
+
 }

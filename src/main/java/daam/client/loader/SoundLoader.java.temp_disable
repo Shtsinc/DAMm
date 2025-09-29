@@ -1,0 +1,39 @@
+package daam.client.loader;
+
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import daam.DAAM;
+import daam.client.RegionHandler;
+import daam.common.sounds.GSONSound;
+
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.Writer;
+import java.util.HashMap;
+
+public class SoundLoader {
+
+    private static final Gson GSON = new GsonBuilder().create();
+
+    public static HashMap<String, GSONSound> toMap() {
+        HashMap<String, GSONSound> map = new HashMap<>();
+        for (String loadedSound : RegionHandler.loadedSounds) {
+            map.put(loadedSound, new GSONSound(loadedSound));
+        }
+        return map;
+    }
+
+    public static void add(String sound) {
+        HashMap<String, GSONSound> sounds = toMap();
+        sounds.put(sound, new GSONSound(sound));
+        File soundJson = DAAM.SOUND_JSON;
+        try (Writer writer = new FileWriter(soundJson)) {
+            GSON.toJson(sounds, writer);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        RegionHandler.loadedSounds.add(sound);
+        RegionHandler.loadSounds();
+    }
+}

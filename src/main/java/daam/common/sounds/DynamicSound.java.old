@@ -4,12 +4,12 @@ import daam.client.RegionSoundHandler;
 import lombok.Getter;
 import lombok.Setter;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.resources.sounds.AbstractTickableSoundInstance;
-import net.minecraft.client.resources.sounds.SoundInstance;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.sounds.SoundSource;
+import net.minecraft.client.audio.ITickableSound;
+import net.minecraft.client.audio.PositionedSound;
+import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.SoundCategory;
 
-public class DynamicSound extends AbstractTickableSoundInstance {
+public class DynamicSound extends PositionedSound implements ITickableSound {
 
     public final boolean flag;
 
@@ -20,20 +20,19 @@ public class DynamicSound extends AbstractTickableSoundInstance {
     private boolean finallyStop = false;
 
     public DynamicSound(String soundIn, boolean flag) {
-        super(new ResourceLocation(soundIn), SoundSource.MASTER, SoundInstance.createUnseededRandom());
+        super(new ResourceLocation(soundIn), SoundCategory.MASTER);
         this.volume = 0.01f;
         this.flag = flag;
-        this.looping = true;
     }
 
     @Override
-    public boolean canPlaySound() {
-        return !this.finallyStop;
-    }
-
-    @Override
-    public boolean canStartSilent() {
+    public boolean canRepeat() {
         return true;
+    }
+
+    @Override
+    public boolean isDonePlaying() {
+        return finallyStop;
     }
 
     public void setVolume(float volume) {
@@ -41,13 +40,13 @@ public class DynamicSound extends AbstractTickableSoundInstance {
     }
 
     @Override
-    public void tick() {
-        Minecraft mc = Minecraft.getInstance();
+    public void update() {
+        Minecraft mc = Minecraft.getMinecraft();
 
         if (mc.player != null) {
-            this.x = mc.player.getX();
-            this.y = mc.player.getY();
-            this.z = mc.player.getZ();
+            this.xPosF = (float) mc.player.posX;
+            this.yPosF = (float) mc.player.posY;
+            this.zPosF = (float) mc.player.posZ;
         }
 
         float limit = 1F;
@@ -69,4 +68,5 @@ public class DynamicSound extends AbstractTickableSoundInstance {
             this.volume += 0.05f;
         }
     }
+
 }
