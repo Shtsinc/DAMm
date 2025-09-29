@@ -109,10 +109,33 @@ public class DAAM {
         LOGGER.info("    \\\\¨:::::::::::\\\\';      '\\\\::\\\\:;'        \\\\::\\\\:;'` ·:;:::::\\\\::\\\\'      \\\\`¨\\\\:::/          \\\\::\\\\'          '\\\\:::::\\\\';  '        ");
         
         NetworkHandler.registry();
+        
+        // Register commands
+        MinecraftForge.EVENT_BUS.addListener(this::registerCommands);
     }
 
     private void clientSetup(final FMLClientSetupEvent event) {
         LOGGER.info("######### Dynamic Ambience And Music successfully loaded #########");
+        
+        // Register client tick event for region checking
+        MinecraftForge.EVENT_BUS.addListener(this::onClientTick);
+        
+        // Load sounds on client setup
+        event.enqueueWork(() -> {
+            daam.client.RegionHandler.loadSounds();
+        });
+    }
+    
+    @SubscribeEvent
+    public void onClientTick(net.minecraftforge.event.TickEvent.ClientTickEvent event) {
+        if (event.phase == net.minecraftforge.event.TickEvent.Phase.END) {
+            daam.client.RegionHandler.clientTick();
+        }
+    }
+
+    @SubscribeEvent
+    public void registerCommands(net.minecraftforge.event.RegisterCommandsEvent event) {
+        daam.common.commands.TestRegionCommand.register(event.getDispatcher());
     }
 
     @SubscribeEvent
