@@ -1,0 +1,28 @@
+modLoader="javafml"
+loaderVersion="[47,)"
+license="MIT"
+issueTrackerURL="https://github.com/Shtsinc/DAMm/issues"
+
+[[mods]]
+modId="daam"
+version="${file.jarVersion}"
+displayName="Dynamic Ambience And Music"
+description='''
+A mod that allows you to create custom regions in your Minecraft world and fill them with unique Music and Ambient sounds.
+'''
+authors="LIRAY"
+displayURL="https://vk.com/muwwy_orders"
+
+[[dependencies.daam]]
+modId="forge"
+mandatory=true
+versionRange="[47,)"
+ordering="NONE"
+side="BOTH"
+
+[[dependencies.daam]]
+modId="minecraft"
+mandatory=true
+versionRange="[1.20.1,1.21)"
+ordering="NONE"
+side="BOTH"

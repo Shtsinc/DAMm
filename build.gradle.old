@@ -1,3 +1,14 @@
+buildscript {
+    repositories {
+        mavenCentral()
+        maven { name = 'MinecraftForge'; url = 'https://maven.minecraftforge.net' }
+    }
+    dependencies {
+        classpath 'net.minecraftforge.gradle:ForgeGradle:6.0.24'
+        classpath 'org.parchmentmc:librarian-bot:1.+' // Pin to latest version for your MC version
+    }
+}
+
 plugins {
     id 'eclipse'
     id 'maven-publish'
@@ -7,17 +18,15 @@ plugins {
 
 version = '2.0.0-1.20.1'
 group = 'daam'
-base {
-    archivesName = 'Dynamic-Ambience-And-Music-1.20.1'
-}
+archivesBaseName = 'Dynamic-Ambience-And-Music-1.20.1'
 
-java.toolchain.languageVersion = JavaLanguageVersion.of(17)
+java.toolchain.languageVersion = JavaLanguageVersion.of(21)
 
 println "Java: ${System.getProperty 'java.version'}, JVM: ${System.getProperty 'java.vm.version'} (${System.getProperty 'java.vendor'}), Arch: ${System.getProperty 'os.arch'}"
 
 minecraft {
     mappings channel: 'official', version: '1.20.1'
-    
+
     copyIdeResources = true
 
     runs {
@@ -47,19 +56,6 @@ minecraft {
             }
         }
 
-        gameTestServer {
-            workingDirectory project.file('run')
-
-            property 'forge.logging.markers', 'REGISTRIES'
-            property 'forge.logging.console.level', 'debug'
-
-            mods {
-                daam {
-                    source sourceSets.main
-                }
-            }
-        }
-
         data {
             workingDirectory project.file('run')
 
@@ -77,8 +73,6 @@ minecraft {
     }
 }
 
-sourceSets.main.resources { srcDir 'src/generated/resources' }
-
 repositories {
     mavenCentral()
     maven { url = "https://jitpack.io" }
@@ -92,39 +86,34 @@ dependencies {
     compileOnly 'org.projectlombok:lombok:1.18.30'
     annotationProcessor 'org.projectlombok:lombok:1.18.30'
 
-    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.8.1'
-    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.8.1'
+    testImplementation(platform('org.junit:junit-bom:5.10.2'))
+    testImplementation('org.junit.jupiter:junit-jupiter')
+    testRuntimeOnly('org.junit.platform:junit-platform-launcher')
+
 }
 
-tasks.named('test') {
+test {
     useJUnitPlatform()
+    testLogging {
+        events "passed", "skipped", "failed"
+    }
 }
+
+compileJava.options.encoding = 'UTF-8'
 
 jar {
     manifest {
         attributes([
-            "Specification-Title"     : "Dynamic-Ambience-And-Music",
-            "Specification-Vendor"    : "DAAM Team",
-            "Specification-Version"   : "1",
-            "Implementation-Title"    : project.name,
-            "Implementation-Version"  : "${version}",
-            "Implementation-Vendor"   : "DAAM Team",
+            "Specification-Title": "Dynamic-Ambience-And-Music",
+            "Specification-Vendor": "Dynamic-Ambience-And-Music",
+            "Specification-Version": "1",
+            "Implementation-Title": project.name,
+            "Implementation-Version": "${version}",
+            "Implementation-Vendor" :"Dynamic-Ambience-And-Music",
+            "FMLAT": "accesstransformer.cfg",
             "Implementation-Timestamp": new Date().format("yyyy-MM-dd'T'HH:mm:ssZ")
         ])
     }
 }
 
 jar.finalizedBy('reobfJar')
-
-publishing {
-    publications {
-        maven(MavenPublication) {
-            artifactId = 'dynamic-ambience-and-music'
-            from components.java
-        }
-    }
-}
-
-tasks.withType(JavaCompile).configureEach {
-    options.encoding = 'UTF-8'
-}
