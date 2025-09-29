@@ -35,7 +35,4 @@ public class RemoveRegionPacket extends SimplePacket {
     }
 
     @Override
-    public void decode(FriendlyByteBuf buf) {
-        // This method is not used in the new system
-    }
 }

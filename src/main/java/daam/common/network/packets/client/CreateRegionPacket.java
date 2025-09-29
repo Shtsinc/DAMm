@@ -56,10 +56,4 @@ public class CreateRegionPacket extends SimplePacket {
     public void encode(FriendlyByteBuf buf) {
         encode(this, buf);
     }
-
-    @Override
-    public void decode(FriendlyByteBuf buf) {
-        CreateRegionPacket decoded = decode(buf);
-        this.regionData = decoded.regionData;
-    }
 }
