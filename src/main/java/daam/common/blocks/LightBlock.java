@@ -1,120 +1,75 @@
 package daam.common.blocks;
 
-import daam.DAAM;
 import lombok.Getter;
 import lombok.Setter;
-import net.minecraft.block.Block;
-import net.minecraft.block.material.Material;
-import net.minecraft.block.properties.PropertyBool;
-import net.minecraft.block.state.BlockFaceShape;
-import net.minecraft.block.state.BlockStateContainer;
-import net.minecraft.block.state.IBlockState;
-import net.minecraft.entity.Entity;
-import net.minecraft.util.BlockRenderLayer;
-import net.minecraft.util.EnumFacing;
-import net.minecraft.util.math.AxisAlignedBB;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.IBlockAccess;
-import net.minecraft.world.World;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.level.BlockGetter;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.RenderShape;
+import net.minecraft.world.level.block.state.BlockBehaviour;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.StateDefinition;
+import net.minecraft.world.level.block.state.properties.BooleanProperty;
+import net.minecraft.world.level.material.MapColor;
+import net.minecraft.world.phys.shapes.CollisionContext;
+import net.minecraft.world.phys.shapes.Shapes;
+import net.minecraft.world.phys.shapes.VoxelShape;
 
-import javax.annotation.Nullable;
-import java.util.List;
-
-@SuppressWarnings({"deprecation", "NullableProblems", "RedundantMethodOverride", "DataFlowIssue"})
 public class LightBlock extends Block {
 
     @Setter
     @Getter
     private static boolean hidden = true;
-    public static PropertyBool propertyBool = PropertyBool.create("hidden");
-
-
+    
+    public static final BooleanProperty HIDDEN = BooleanProperty.create("hidden");
     private final int level;
-
-    protected AxisAlignedBB NULL = new AxisAlignedBB(0, 0, 0, 0, 0, 0);
+    
+    protected static final VoxelShape EMPTY_SHAPE = Shapes.empty();
 
     public LightBlock(int level) {
-        super(Material.CIRCUITS);
+        super(BlockBehaviour.Properties.of()
+            .mapColor(MapColor.NONE)
+            .noCollission()
+            .lightLevel((state) -> level)
+            .noOcclusion()
+            .strength(-1.0F, 3600000.0F) // Unbreakable
+            .noLootTable());
         this.level = level;
-        setRegistryName(DAAM.MODID, "light_lv" + level);
-        setTranslationKey("light_lv" + level);
-        setCreativeTab(DAAM.TAB);
-        setBlockUnbreakable();
-
+        this.registerDefaultState(this.stateDefinition.any().setValue(HIDDEN, hidden));
     }
 
     @Override
-    public void addCollisionBoxToList(IBlockState state, World worldIn, BlockPos pos, AxisAlignedBB entityBox, List<AxisAlignedBB> collidingBoxes, @Nullable Entity entityIn, boolean isActualState) {
+    protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder) {
+        builder.add(HIDDEN);
     }
 
     @Override
-    public boolean canBeConnectedTo(IBlockAccess world, BlockPos pos, EnumFacing facing) {
-        return false;
+    public VoxelShape getShape(BlockState state, BlockGetter level, BlockPos pos, CollisionContext context) {
+        return isHidden() ? EMPTY_SHAPE : Shapes.block();
     }
 
     @Override
-    public int getLightOpacity(IBlockState state, IBlockAccess world, BlockPos pos) {
-        return 0;
+    public VoxelShape getCollisionShape(BlockState state, BlockGetter level, BlockPos pos, CollisionContext context) {
+        return EMPTY_SHAPE;
     }
 
     @Override
-    public int getLightValue(IBlockState state, IBlockAccess world, BlockPos pos) {
-        return level;
+    public RenderShape getRenderShape(BlockState state) {
+        return isHidden() ? RenderShape.INVISIBLE : RenderShape.MODEL;
     }
 
     @Override
-    @SideOnly(Side.CLIENT)
-    public AxisAlignedBB getBoundingBox(IBlockState state, IBlockAccess source, BlockPos pos) {
-        return isHidden() ? NULL : FULL_BLOCK_AABB;
+    public boolean propagatesSkylightDown(BlockState state, BlockGetter reader, BlockPos pos) {
+        return true;
     }
 
     @Override
-    protected BlockStateContainer createBlockState() {
-        return new BlockStateContainer(this, propertyBool);
+    public float getShadeBrightness(BlockState state, BlockGetter level, BlockPos pos) {
+        return 1.0F;
     }
 
     @Override
-    public IBlockState getActualState(IBlockState state, IBlockAccess worldIn, BlockPos pos) {
-        return state.withProperty(propertyBool, isHidden());
+    public boolean useShapeForLightOcclusion(BlockState state) {
+        return true;
     }
-
-    @Override
-    public int getMetaFromState(IBlockState state) {
-        return state.getValue(propertyBool) ? 1 : 0;
-    }
-
-    @Override
-    public IBlockState getStateFromMeta(int meta) {
-        return this.getDefaultState().withProperty(propertyBool, meta == 1);
-    }
-
-    @Nullable
-    @Override
-    public AxisAlignedBB getCollisionBoundingBox(IBlockState blockState, IBlockAccess worldIn, BlockPos pos) {
-        return NULL_AABB;
-    }
-
-    @Override
-    public boolean isOpaqueCube(IBlockState state) {
-        return false;
-    }
-
-    @Override
-    public boolean isFullCube(IBlockState state) {
-        return false;
-    }
-
-    @Override
-    public BlockFaceShape getBlockFaceShape(IBlockAccess worldIn, IBlockState state, BlockPos pos, EnumFacing face) {
-        return BlockFaceShape.UNDEFINED;
-    }
-
-    @Override
-    @SideOnly(Side.CLIENT)
-    public BlockRenderLayer getRenderLayer() {
-        return BlockRenderLayer.TRANSLUCENT;
-    }
-
 }

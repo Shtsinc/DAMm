@@ -1,141 +1,107 @@
 package daam.common.blocks;
 
-import daam.DAAM;
 import daam.client.DrawUtils;
 import daam.client.screens.GuiSoundEditor;
 import daam.common.items.SoundStick;
 import daam.common.tile.SoundBlockTileEntity;
 import lombok.Getter;
 import lombok.Setter;
-import net.minecraft.block.Block;
-import net.minecraft.block.material.Material;
-import net.minecraft.block.properties.PropertyBool;
-import net.minecraft.block.state.BlockFaceShape;
-import net.minecraft.block.state.BlockStateContainer;
-import net.minecraft.block.state.IBlockState;
-import net.minecraft.client.Minecraft;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.BlockRenderLayer;
-import net.minecraft.util.EnumFacing;
-import net.minecraft.util.EnumHand;
-import net.minecraft.util.math.AxisAlignedBB;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.IBlockAccess;
-import net.minecraft.world.World;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResult;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.BlockGetter;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.BaseEntityBlock;
+import net.minecraft.world.level.block.RenderShape;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.state.BlockBehaviour;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.StateDefinition;
+import net.minecraft.world.level.block.state.properties.BooleanProperty;
+import net.minecraft.world.level.material.MapColor;
+import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.phys.shapes.CollisionContext;
+import net.minecraft.world.phys.shapes.Shapes;
+import net.minecraft.world.phys.shapes.VoxelShape;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 
 import javax.annotation.Nullable;
-import java.util.List;
 
-@SuppressWarnings({"deprecation", "NullableProblems", "RedundantMethodOverride", "DataFlowIssue"})
-public class SoundBlock extends Block {
+public class SoundBlock extends BaseEntityBlock {
 
     @Setter
     @Getter
     private static boolean hidden = true;
-    public static PropertyBool propertyBool = PropertyBool.create("hidden");
-
-
-    protected AxisAlignedBB NULL = new AxisAlignedBB(0, 0, 0, 0, 0, 0);
+    
+    public static final BooleanProperty HIDDEN = BooleanProperty.create("hidden");
+    protected static final VoxelShape EMPTY_SHAPE = Shapes.empty();
 
     public SoundBlock() {
-        super(Material.CIRCUITS);
-        setRegistryName(DAAM.MODID, "sound_block");
-        setTranslationKey("sound_block");
-        setCreativeTab(DAAM.TAB);
-        setBlockUnbreakable();
-
+        super(BlockBehaviour.Properties.of()
+            .mapColor(MapColor.NONE)
+            .noCollission()
+            .noOcclusion()
+            .strength(-1.0F, 3600000.0F) // Unbreakable
+            .noLootTable());
+        this.registerDefaultState(this.stateDefinition.any().setValue(HIDDEN, hidden));
     }
 
     @Override
-    @SideOnly(Side.CLIENT)
-    public boolean onBlockActivated(World world, BlockPos pos, IBlockState state, EntityPlayer playerIn, EnumHand hand, EnumFacing facing, float hitX, float hitY, float hitZ) {
-        if (world.isRemote) {
-            boolean flag = playerIn.getHeldItemMainhand().getItem() instanceof SoundStick;
+    protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder) {
+        builder.add(HIDDEN);
+    }
+
+    @Override
+    @OnlyIn(Dist.CLIENT)
+    public InteractionResult use(BlockState state, Level level, BlockPos pos, Player player, 
+                               InteractionHand hand, BlockHitResult hit) {
+        if (level.isClientSide) {
+            boolean flag = player.getMainHandItem().getItem() instanceof SoundStick;
             if (flag) {
-                TileEntity tileEntity = world.getTileEntity(pos);
-                if (tileEntity instanceof SoundBlockTileEntity) {
-                    DrawUtils.open(new GuiSoundEditor((SoundBlockTileEntity) tileEntity));
+                BlockEntity blockEntity = level.getBlockEntity(pos);
+                if (blockEntity instanceof SoundBlockTileEntity soundTile) {
+                    DrawUtils.open(new GuiSoundEditor(soundTile));
                 }
             }
         }
-        return false;
+        return InteractionResult.SUCCESS;
+    }
+
+    @Nullable
+    @Override
+    public BlockEntity newBlockEntity(BlockPos pos, BlockState state) {
+        return new SoundBlockTileEntity(null, pos, state); // TODO: Add BlockEntityType
     }
 
     @Override
-    public boolean hasTileEntity(IBlockState state) {
+    public VoxelShape getShape(BlockState state, BlockGetter level, BlockPos pos, CollisionContext context) {
+        return isHidden() ? EMPTY_SHAPE : Shapes.block();
+    }
+
+    @Override
+    public VoxelShape getCollisionShape(BlockState state, BlockGetter level, BlockPos pos, CollisionContext context) {
+        return EMPTY_SHAPE;
+    }
+
+    @Override
+    public RenderShape getRenderShape(BlockState state) {
+        return isHidden() ? RenderShape.INVISIBLE : RenderShape.MODEL;
+    }
+
+    @Override
+    public boolean propagatesSkylightDown(BlockState state, BlockGetter reader, BlockPos pos) {
         return true;
     }
 
-    @Nullable
     @Override
-    public TileEntity createTileEntity(World world, IBlockState state) {
-        return new SoundBlockTileEntity();
+    public float getShadeBrightness(BlockState state, BlockGetter level, BlockPos pos) {
+        return 1.0F;
     }
 
     @Override
-    public void addCollisionBoxToList(IBlockState state, World worldIn, BlockPos pos, AxisAlignedBB entityBox, List<AxisAlignedBB> collidingBoxes, @Nullable Entity entityIn, boolean isActualState) {
+    public boolean useShapeForLightOcclusion(BlockState state) {
+        return true;
     }
-
-    @Override
-    public boolean canBeConnectedTo(IBlockAccess world, BlockPos pos, EnumFacing facing) {
-        return false;
-    }
-
-    @Override
-    @SideOnly(Side.CLIENT)
-    public AxisAlignedBB getBoundingBox(IBlockState state, IBlockAccess source, BlockPos pos) {
-        return isHidden() ? NULL : FULL_BLOCK_AABB;
-    }
-
-    @Override
-    protected BlockStateContainer createBlockState() {
-        return new BlockStateContainer(this, propertyBool);
-    }
-
-    @Override
-    public IBlockState getActualState(IBlockState state, IBlockAccess worldIn, BlockPos pos) {
-        return state.withProperty(propertyBool, isHidden());
-    }
-
-    @Override
-    public int getMetaFromState(IBlockState state) {
-        return state.getValue(propertyBool) ? 1 : 0;
-    }
-
-    @Override
-    public IBlockState getStateFromMeta(int meta) {
-        return this.getDefaultState().withProperty(propertyBool, meta == 1);
-    }
-
-    @Nullable
-    @Override
-    public AxisAlignedBB getCollisionBoundingBox(IBlockState blockState, IBlockAccess worldIn, BlockPos pos) {
-        return NULL_AABB;
-    }
-
-    @Override
-    public boolean isOpaqueCube(IBlockState state) {
-        return false;
-    }
-
-    @Override
-    public boolean isFullCube(IBlockState state) {
-        return false;
-    }
-
-    @Override
-    public BlockFaceShape getBlockFaceShape(IBlockAccess worldIn, IBlockState state, BlockPos pos, EnumFacing face) {
-        return BlockFaceShape.UNDEFINED;
-    }
-
-    @Override
-    @SideOnly(Side.CLIENT)
-    public BlockRenderLayer getRenderLayer() {
-        return BlockRenderLayer.TRANSLUCENT;
-    }
-
 }

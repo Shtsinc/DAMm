@@ -1,65 +1,41 @@
 package daam.common.network.packets.client;
 
-import daam.DAAM;
 import daam.common.network.packets.SimplePacket;
-import daam.common.network.packets.server.ResponseRegionFromChunkPacket;
-import daam.common.world.DAAMWorldSavedData;
-import daam.common.world.Region;
-import daam.common.world.RegionChunks;
-import io.netty.buffer.ByteBuf;
-import net.minecraft.entity.player.EntityPlayerMP;
-import net.minecraft.world.chunk.Chunk;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraftforge.network.NetworkEvent;
 
-import java.util.HashMap;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Supplier;
 
 public class RequestRegionFromChunkPacket extends SimplePacket {
 
-    private int chunkX;
-    private int chunkZ;
-
     public RequestRegionFromChunkPacket() {
-
+        // TODO: Port from 1.12.2 to 1.20.1
     }
 
-    public RequestRegionFromChunkPacket(Chunk chunk) {
-        this.chunkX = chunk.x;
-        this.chunkZ = chunk.z;
+    public static void encode(RequestRegionFromChunkPacket packet, FriendlyByteBuf buf) {
+        // TODO: Implement encoding
     }
 
-    @Override
-    public void toBytes(ByteBuf buf) {
-        buf.writeInt(chunkX);
-        buf.writeInt(chunkZ);
+    public static RequestRegionFromChunkPacket decode(FriendlyByteBuf buf) {
+        // TODO: Implement decoding
+        return new RequestRegionFromChunkPacket();
     }
 
-    @Override
-    public void fromBytes(ByteBuf buf) {
-        chunkX = buf.readInt();
-        chunkZ = buf.readInt();
-    }
-
-    @Override
-    public void server(EntityPlayerMP player) {
-        Chunk chunk = player.world.getChunk(chunkX, chunkZ);
-        DAAMWorldSavedData savedData = DAAMWorldSavedData.get(player.world);
-
-        ConcurrentHashMap<RegionChunks, Region> regions = savedData.regions;
-
-        HashMap<RegionChunks, Region> filtered = new HashMap<>();
-        regions.entrySet().forEach((entry) -> {
-            RegionChunks regionChunks = entry.getKey();
-            boolean contains = regionChunks.equalsWithChunk(chunk);
-            if (contains) {
-                filtered.put(entry.getKey(), entry.getValue());
-            }
+    public static void handle(RequestRegionFromChunkPacket packet, Supplier<NetworkEvent.Context> contextSupplier) {
+        NetworkEvent.Context context = contextSupplier.get();
+        context.enqueueWork(() -> {
+            // TODO: Implement packet handling
         });
-
-        if (filtered.isEmpty()) {
-            return;
-        }
-
-        DAAM.NETWORK.client(new ResponseRegionFromChunkPacket(DAAMWorldSavedData.writeNBT(filtered)), player);
+        context.setPacketHandled(true);
     }
 
+    @Override
+    public void encode(FriendlyByteBuf buf) {
+        encode(this, buf);
+    }
+
+    @Override
+    public void decode(FriendlyByteBuf buf) {
+        // This method is not used in the new system
+    }
 }

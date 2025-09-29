@@ -1,41 +1,41 @@
 package daam.common.network.packets.client;
 
-import daam.DAAM;
-import daam.client.RegionHandler;
-import daam.common.network.packets.SimpleNBTPacket;
-import daam.common.world.DAAMWorldSavedData;
-import daam.common.world.Region;
-import net.minecraft.client.Minecraft;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.entity.player.EntityPlayerMP;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
+import daam.common.network.packets.SimplePacket;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraftforge.network.NetworkEvent;
 
-public class RemoveRegionPacket extends SimpleNBTPacket {
+import java.util.function.Supplier;
+
+public class RemoveRegionPacket extends SimplePacket {
 
     public RemoveRegionPacket() {
+        // TODO: Port from 1.12.2 to 1.20.1
     }
 
-    public RemoveRegionPacket(Region region) {
-        this.compound = region.serializeNBT();
+    public static void encode(RemoveRegionPacket packet, FriendlyByteBuf buf) {
+        // TODO: Implement encoding
+    }
+
+    public static RemoveRegionPacket decode(FriendlyByteBuf buf) {
+        // TODO: Implement decoding
+        return new RemoveRegionPacket();
+    }
+
+    public static void handle(RemoveRegionPacket packet, Supplier<NetworkEvent.Context> contextSupplier) {
+        NetworkEvent.Context context = contextSupplier.get();
+        context.enqueueWork(() -> {
+            // TODO: Implement packet handling
+        });
+        context.setPacketHandled(true);
     }
 
     @Override
-    @SideOnly(Side.CLIENT)
-    public void client(Minecraft mc, EntityPlayer player) {
-        Region updatedRegion = new Region();
-        updatedRegion.deserializeNBT(compound);
-        RegionHandler.regions.entrySet().removeIf(entry -> entry.getValue().equals(updatedRegion));
+    public void encode(FriendlyByteBuf buf) {
+        encode(this, buf);
     }
 
     @Override
-    public void server(EntityPlayerMP player) {
-        Region updatedRegion = new Region();
-        updatedRegion.deserializeNBT(compound);
-
-        DAAMWorldSavedData savedData = DAAMWorldSavedData.get(player.world);
-        savedData.regions.entrySet().removeIf(entry -> entry.getValue().equals(updatedRegion));
-
-        DAAM.NETWORK.all(new RemoveRegionPacket(updatedRegion));
+    public void decode(FriendlyByteBuf buf) {
+        // This method is not used in the new system
     }
 }

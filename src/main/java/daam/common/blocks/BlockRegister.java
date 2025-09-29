@@ -1,50 +1,56 @@
 package daam.common.blocks;
 
-import net.minecraft.block.Block;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.block.model.ModelResourceLocation;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemBlock;
-import net.minecraftforge.fml.common.registry.ForgeRegistries;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
+import daam.DAAM;
+import net.minecraft.world.item.BlockItem;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.level.block.Block;
+import net.minecraftforge.registries.DeferredRegister;
+import net.minecraftforge.registries.ForgeRegistries;
+import net.minecraftforge.registries.RegistryObject;
 
-import java.util.ArrayList;
+import java.util.function.Supplier;
 
-@SuppressWarnings("DataFlowIssue")
 public class BlockRegister {
+    
+    public static final DeferredRegister<Block> BLOCKS = 
+        DeferredRegister.create(ForgeRegistries.BLOCKS, DAAM.MODID);
+    
+    public static final DeferredRegister<Item> BLOCK_ITEMS = 
+        DeferredRegister.create(ForgeRegistries.ITEMS, DAAM.MODID);
 
-    public static ArrayList<Block> blocks = new ArrayList<>();
+    // Light blocks for each level (0-15)
+    public static final RegistryObject<LightBlock> LIGHT_BLOCK_0 = registerLightBlock(0);
+    public static final RegistryObject<LightBlock> LIGHT_BLOCK_1 = registerLightBlock(1);
+    public static final RegistryObject<LightBlock> LIGHT_BLOCK_2 = registerLightBlock(2);
+    public static final RegistryObject<LightBlock> LIGHT_BLOCK_3 = registerLightBlock(3);
+    public static final RegistryObject<LightBlock> LIGHT_BLOCK_4 = registerLightBlock(4);
+    public static final RegistryObject<LightBlock> LIGHT_BLOCK_5 = registerLightBlock(5);
+    public static final RegistryObject<LightBlock> LIGHT_BLOCK_6 = registerLightBlock(6);
+    public static final RegistryObject<LightBlock> LIGHT_BLOCK_7 = registerLightBlock(7);
+    public static final RegistryObject<LightBlock> LIGHT_BLOCK_8 = registerLightBlock(8);
+    public static final RegistryObject<LightBlock> LIGHT_BLOCK_9 = registerLightBlock(9);
+    public static final RegistryObject<LightBlock> LIGHT_BLOCK_10 = registerLightBlock(10);
+    public static final RegistryObject<LightBlock> LIGHT_BLOCK_11 = registerLightBlock(11);
+    public static final RegistryObject<LightBlock> LIGHT_BLOCK_12 = registerLightBlock(12);
+    public static final RegistryObject<LightBlock> LIGHT_BLOCK_13 = registerLightBlock(13);
+    public static final RegistryObject<LightBlock> LIGHT_BLOCK_14 = registerLightBlock(14);
+    public static final RegistryObject<LightBlock> LIGHT_BLOCK_15 = registerLightBlock(15);
 
-    static {
-        for (int i = 0; i < 16; i++) {
-            blocks.add(new LightBlock(i));
-        }
-        blocks.add(new SoundBlock());
+    // Sound block
+    public static final RegistryObject<SoundBlock> SOUND_BLOCK = registerBlock("sound_block", 
+        () -> new SoundBlock());
+
+    private static RegistryObject<LightBlock> registerLightBlock(int level) {
+        return registerBlock("light_lv" + level, () -> new LightBlock(level));
     }
 
-    public static void register() {
-        for (Block block : blocks) {
-            apply(block);
-        }
-
+    private static <T extends Block> RegistryObject<T> registerBlock(String name, Supplier<T> block) {
+        RegistryObject<T> toReturn = BLOCKS.register(name, block);
+        registerBlockItem(name, toReturn);
+        return toReturn;
     }
 
-    private static void apply(Block block) {
-        ForgeRegistries.BLOCKS.register(block);
-        ForgeRegistries.ITEMS.register(new ItemBlock(block).setRegistryName(block.getRegistryName()));
-    }
-
-    @SideOnly(Side.CLIENT)
-    public static void registerRender() {
-        for (Block block : blocks) {
-            applyRender(block);
-        }
-    }
-
-    @SideOnly(Side.CLIENT)
-    private static void applyRender(Block block) {
-        Minecraft.getMinecraft().getRenderItem().getItemModelMesher()
-                .register(Item.getItemFromBlock(block), 0, new ModelResourceLocation(block.getRegistryName(), "inventory"));
+    private static <T extends Block> void registerBlockItem(String name, RegistryObject<T> block) {
+        BLOCK_ITEMS.register(name, () -> new BlockItem(block.get(), new Item.Properties()));
     }
 }

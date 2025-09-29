@@ -1,39 +1,41 @@
 package daam.common.network.packets.client;
 
-import daam.client.RegionHandler;
-import daam.common.network.packets.SimpleNBTPacket;
-import daam.common.world.Region;
-import daam.common.world.RegionChunks;
-import net.minecraft.client.Minecraft;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
+import daam.common.network.packets.SimplePacket;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraftforge.network.NetworkEvent;
 
-public class SyncRegionPacket extends SimpleNBTPacket {
+import java.util.function.Supplier;
+
+public class SyncRegionPacket extends SimplePacket {
 
     public SyncRegionPacket() {
+        // TODO: Port from 1.12.2 to 1.20.1
     }
 
-    public SyncRegionPacket(Region region) {
-        this.compound = region.serializeNBT();
+    public static void encode(SyncRegionPacket packet, FriendlyByteBuf buf) {
+        // TODO: Implement encoding
+    }
+
+    public static SyncRegionPacket decode(FriendlyByteBuf buf) {
+        // TODO: Implement decoding
+        return new SyncRegionPacket();
+    }
+
+    public static void handle(SyncRegionPacket packet, Supplier<NetworkEvent.Context> contextSupplier) {
+        NetworkEvent.Context context = contextSupplier.get();
+        context.enqueueWork(() -> {
+            // TODO: Implement packet handling
+        });
+        context.setPacketHandled(true);
     }
 
     @Override
-    @SideOnly(Side.CLIENT)
-    public void client(Minecraft mc, EntityPlayer player) {
-        Region updatedRegion = new Region();
-        updatedRegion.deserializeNBT(compound);
-        boolean flag = true;
-        for (Region region : RegionHandler.regions.values()) {
-            if (region.equals(updatedRegion)) {
-                region.deserializeNBT(updatedRegion.serializeNBT());
-                flag = false;
-            }
-        }
-        if (flag) {
-            RegionHandler.regions.put(new RegionChunks(updatedRegion.getUUID(), mc.world, updatedRegion.getAABB()), updatedRegion);
-        }
-        RegionHandler.soundHandler.stopAll();
+    public void encode(FriendlyByteBuf buf) {
+        encode(this, buf);
     }
 
+    @Override
+    public void decode(FriendlyByteBuf buf) {
+        // This method is not used in the new system
+    }
 }

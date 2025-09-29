@@ -1,33 +1,41 @@
 package daam.common.network.packets.client;
 
-import daam.DAAM;
-import daam.common.network.packets.SimpleNBTPacket;
-import daam.common.world.DAAMWorldSavedData;
-import daam.common.world.Region;
-import net.minecraft.entity.player.EntityPlayerMP;
+import daam.common.network.packets.SimplePacket;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraftforge.network.NetworkEvent;
 
-public class UpdateRegionPacket extends SimpleNBTPacket {
+import java.util.function.Supplier;
+
+public class UpdateRegionPacket extends SimplePacket {
 
     public UpdateRegionPacket() {
+        // TODO: Port from 1.12.2 to 1.20.1
     }
 
-    public UpdateRegionPacket(Region region) {
-        this.compound = region.serializeNBT();
+    public static void encode(UpdateRegionPacket packet, FriendlyByteBuf buf) {
+        // TODO: Implement encoding
+    }
+
+    public static UpdateRegionPacket decode(FriendlyByteBuf buf) {
+        // TODO: Implement decoding
+        return new UpdateRegionPacket();
+    }
+
+    public static void handle(UpdateRegionPacket packet, Supplier<NetworkEvent.Context> contextSupplier) {
+        NetworkEvent.Context context = contextSupplier.get();
+        context.enqueueWork(() -> {
+            // TODO: Implement packet handling
+        });
+        context.setPacketHandled(true);
     }
 
     @Override
-    public void server(EntityPlayerMP player) {
-        DAAMWorldSavedData savedData = DAAMWorldSavedData.get(player.world);
-        Region updatedRegion = new Region();
-        updatedRegion.deserializeNBT(compound);
+    public void encode(FriendlyByteBuf buf) {
+        encode(this, buf);
+    }
 
-        for (Region region : savedData.regions.values()) {
-            if (region.equals(updatedRegion)) {
-                region.deserializeNBT(updatedRegion.serializeNBT());
-            }
-        }
-        savedData.markDirty();
-
-        DAAM.NETWORK.all(new SyncRegionPacket(updatedRegion));
+    @Override
+    public void decode(FriendlyByteBuf buf) {
+        // This method is not used in the new system
     }
 }

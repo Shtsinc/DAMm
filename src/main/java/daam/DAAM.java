@@ -1,6 +1,7 @@
 package daam;
 
 import daam.client.RegionHandler;
+import daam.common.blocks.BlockRegister;
 import daam.common.items.ItemRegister;
 import daam.common.network.NetworkHandler;
 import net.minecraft.resources.ResourceLocation;
@@ -56,6 +57,8 @@ public class DAAM {
         
         // Register deferred registers
         ItemRegister.ITEMS.register(modEventBus);
+        BlockRegister.BLOCKS.register(modEventBus);
+        BlockRegister.BLOCK_ITEMS.register(modEventBus);
         CREATIVE_MODE_TABS.register(modEventBus);
         
         // Register ourselves for server and other game events we are interested in

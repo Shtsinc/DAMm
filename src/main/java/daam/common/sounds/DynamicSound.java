@@ -69,4 +69,8 @@ public class DynamicSound extends AbstractTickableSoundInstance {
             this.volume += 0.05f;
         }
     }
+    
+    public void setStop(boolean stop) {
+        this.stop = stop;
+    }
 }

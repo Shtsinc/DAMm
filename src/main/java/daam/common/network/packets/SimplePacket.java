@@ -1,50 +1,48 @@
 package daam.common.network.packets;
 
-import io.netty.buffer.ByteBuf;
 import net.minecraft.client.Minecraft;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.entity.player.EntityPlayerMP;
-import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
-import net.minecraftforge.fml.common.network.simpleimpl.IMessageHandler;
-import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.player.Player;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
+import net.minecraftforge.network.NetworkEvent;
 
-public class SimplePacket implements IMessage, IMessageHandler<SimplePacket, SimplePacket> {
+import java.util.function.Supplier;
 
-    @Override
-    public SimplePacket onMessage(SimplePacket sp, MessageContext ctx) {
-        if (ctx.side.isServer())
-            sp.server(ctx.getServerHandler().player);
-        else
-            mc().addScheduledTask(() -> sp.client(mc(), clientPlayer()));
-        return null;
+public abstract class SimplePacket {
+
+    public abstract void encode(FriendlyByteBuf buf);
+    
+    public abstract void decode(FriendlyByteBuf buf);
+
+    public void handle(Supplier<NetworkEvent.Context> contextSupplier) {
+        NetworkEvent.Context context = contextSupplier.get();
+        context.enqueueWork(() -> {
+            if (context.getDirection().getReceptionSide().isServer()) {
+                handleServer(context.getSender());
+            } else {
+                handleClient();
+            }
+        });
+        context.setPacketHandled(true);
     }
 
-    public void client(Minecraft mc, EntityPlayer player) {
+    protected void handleClient() {
+        // Override in client packets
     }
 
-    public void server(EntityPlayerMP player) {
+    protected void handleServer(ServerPlayer player) {
+        // Override in server packets
     }
 
-    @SideOnly(Side.CLIENT)
-    private EntityPlayer clientPlayer() {
-        return Minecraft.getMinecraft().player;
+    @OnlyIn(Dist.CLIENT)
+    protected Player getClientPlayer() {
+        return Minecraft.getInstance().player;
     }
 
-    @SideOnly(Side.CLIENT)
-    private Minecraft mc() {
-        return Minecraft.getMinecraft();
+    @OnlyIn(Dist.CLIENT)
+    protected Minecraft getMinecraft() {
+        return Minecraft.getInstance();
     }
-
-    @Override
-    public void fromBytes(ByteBuf buf) {
-
-    }
-
-    @Override
-    public void toBytes(ByteBuf buf) {
-
-    }
-
 }
